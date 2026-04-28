@@ -1,0 +1,9 @@
+streamlit
+streamlit-folium
+folium
+SynopticPy==2025.9.0
+polars==1.39.3
+plotly
+pandas
+matplotlib
+numpy 
