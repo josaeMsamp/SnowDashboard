@@ -4,7 +4,7 @@ from streamlit_folium import st_folium
 from data import load_synoptic_data, plot_variable, make_site_map, get_current_stats
 from config import VARIABLE_LABELS, SITE_COLORS
 from datetime import datetime 
-from RadiativeForcing import df_11am, plot_albedo
+from RadiativeForcing import load_albedo_data, plot_albedo
 
 #set webpage title 
 st.set_page_config(page_title="Wasatch Snow Study Plot Dashboard", layout="wide")
@@ -153,11 +153,11 @@ end_date = st.sidebar.date_input(
 col1, col2 = st.columns(2)  # equal-width columns for map and stats
 # add Folium map to col1
 with col1:
-    site_map = make_site_map(df, variable)
+    site_map = make_site_map(variable)
     st_folium(site_map, width=700, height=600)  # moderate width to fit half the row cleanly
 # add current conditions to col2
 with col2:
-    stats_df = get_current_stats(df, variable) #pull from config.py
+    stats_df = get_current_stats(variable) #pull from config.py
     html = f'''
 <div style="background-color: #FFFFFF; padding: 20px; border-radius: 0.1px; width: 100%; box-sizing: border-box;">
 <h3 style='color:#032B56; margin-bottom: 0.8rem; font-family: "Segoe UI", sans-serif; font-weight: 600; text-align: left; font-size: 2.2em;'>Current Conditions - {VARIABLE_LABELS[variable]}</h3>
@@ -176,7 +176,7 @@ with col2:
 
 ##MAIN PLOT##
 
-fig = plot_variable(df, variable, sites, start_date, end_date) #figure with controls 
+fig = plot_variable(variable, tuple(sites), start_date, end_date) #figure with controls 
 st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True, 'responsive': True}, key ="main_plot")
 
 #RADIATIVE FORCING SECTION##
@@ -189,7 +189,7 @@ st.write(
     "Measurements of albedo provide insight into snowpack energy balance and melt processes."
 )
 
-fig_albedo = plot_albedo(df_11am) #figure with controls 
+fig_albedo = plot_albedo(load_albedo_data()) #figure with controls 
 st.plotly_chart(fig_albedo, use_container_width=True, config={'displayModeBar': True, 'responsive': False}, key ="albedo_plot")
 
 

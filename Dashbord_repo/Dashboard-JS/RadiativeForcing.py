@@ -4,6 +4,7 @@
 #housekeeping 
 import os
 os.environ.setdefault("POLARS_SKIP_CPU_CHECK", "1")
+import streamlit as st
 import plotly.express as px
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,6 +16,7 @@ from config import SITE_COLORS, STATIONS, API_TOKEN
 os.environ.setdefault("SYNOPTIC_TOKEN", API_TOKEN) #very important for synoptic data pull
 
 #define function to download data
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_synoptic_data_wide():
     start = datetime(2025, 10, 1)
     end = datetime.utcnow()
@@ -37,47 +39,38 @@ def load_synoptic_data_wide():
     aggfunc="first"
 ).reset_index()
 
+    # Rename columns for clarity 
+    column_renames = { 
+        'date_time': 'Time Stamp',
+        'solar_radiation': 'Incoming BB',
+        'outgoing_radiation_sw': 'Reflected BB',
+    }
+    df_wide = df_wide.rename(columns=column_renames)  
+
+    # Convert 'Time Stamp' to datetime and radiation columns to numeric
+    df_wide["Time Stamp"] = pd.to_datetime(df_wide["Time Stamp"], errors="coerce", utc=True)
+    df_wide["Incoming BB"] = pd.to_numeric(df_wide["Incoming BB"], errors="coerce")
+    df_wide["Reflected BB"] = pd.to_numeric(df_wide["Reflected BB"], errors="coerce")
+
+    # Define broadband albedo and enforce realistic values
+    df_wide["BB Albedo"] = np.where(
+        df_wide["Incoming BB"] > 0,
+        df_wide["Reflected BB"] / df_wide["Incoming BB"],
+        np.nan
+    )
+    df_wide.loc[
+        (df_wide["BB Albedo"] < 0.1) | (df_wide["BB Albedo"] > 1),
+        "BB Albedo"
+    ] = np.nan
+
     return df_wide
 
-#make data wide
-df_wide = load_synoptic_data_wide()
-
-
-# Rename columns for clarity 
-column_renames = { 
-    'date_time': 'Time Stamp',
-    'solar_radiation': 'Incoming BB',
-    'outgoing_radiation_sw': 'Reflected BB',
-}
-df_wide = df_wide.rename(columns=column_renames)  
-
-# Convert 'Time Stamp' to datetime, coerce errors to handle any non-datetime values
-df_wide["Time Stamp"] = pd.to_datetime(df_wide["Time Stamp"], errors="coerce") 
-
-# Convert radiation columns to numeric, coercing errors to handle non-numeric values
-df_wide["Incoming BB"] = pd.to_numeric(df_wide["Incoming BB"], errors="coerce")
-df_wide["Reflected BB"] = pd.to_numeric(df_wide["Reflected BB"], errors="coerce")
-
-# Define broadband albedo
-df_wide["BB Albedo"] = np.where(
-    df_wide["Incoming BB"] > 0,
-    df_wide["Reflected BB"] / df_wide["Incoming BB"],
-    np.nan
-)
-
-# Keep only realistic values, removing values below 0.1 for visual clarity, values above 1 are impossible
-df_wide.loc[
-    (df_wide["BB Albedo"] < 0.1) | (df_wide["BB Albedo"] > 1),
-    "BB Albedo"
-] = np.nan 
-
-#filter to 11 am values 
-# Convert to datetime with UTC
-df_wide["Time Stamp"] = pd.to_datetime(df_wide["Time Stamp"], errors="coerce", utc=True)
-# Convert to local time (Utah)
-df_wide["Time Stamp"] = df_wide["Time Stamp"].dt.tz_convert("America/Denver")
-# Filter 11 AM
-df_11am = df_wide[df_wide["Time Stamp"].dt.hour == 11] 
+@st.cache_data(ttl=10800, show_spinner=False)
+def load_albedo_data():
+    df_wide = load_synoptic_data_wide()
+    df_wide = df_wide.copy()
+    df_wide["Time Stamp"] = df_wide["Time Stamp"].dt.tz_convert("America/Denver")
+    return df_wide[df_wide["Time Stamp"].dt.hour == 11]
 
 #define function for plotting albedo to be used in app.py
 def plot_albedo(df_wide):

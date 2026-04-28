@@ -3,6 +3,7 @@
 #import packages
 import os
 os.environ.setdefault("POLARS_SKIP_CPU_CHECK", "1")
+import streamlit as st
 import polars as pl
 import plotly.express as px
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from config import SITE_INFO
 
 ##MAIN DATA PLOT##
 
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_synoptic_data():
     start = datetime(2025, 10, 1) #aribtrary start date
     end = datetime.utcnow() #end current time
@@ -30,8 +32,9 @@ def load_synoptic_data():
 
     return ts.df() #return as data frame
 
-#create function to plot variable with controls for site, variable, and time range to be used in app.py
-def plot_variable(df, variable, sites, start_date, end_date): 
+@st.cache_data(ttl=900, show_spinner=False)
+def plot_variable(variable, sites, start_date, end_date): 
+    df = load_synoptic_data()
     df = df.filter(pl.col("variable") == variable) #filter by variable
     df = df.filter(pl.col("stid").is_in(sites)) #filter by site selection 
     df = df.filter(pl.col("value").is_not_null()) #filter to avoid errors in plotting if null values 
@@ -106,9 +109,10 @@ def plot_variable(df, variable, sites, start_date, end_date):
 ##MAP##  
 
 #define function to make map in app.py with current conditions for coloring and popups with site metadata from config.py
-def make_site_map(df, variable):
+@st.cache_data(ttl=900, show_spinner=False)
+def make_site_map(variable):
     # Get current stats for coloring
-    stats_df = get_current_stats(df, variable) 
+    stats_df = get_current_stats(variable) 
     # Get min and max values for normalization for coloring on map for visualization of current condiitons
     values = stats_df['value'].to_list()
     values = [v for v in values if v is not None]
@@ -194,7 +198,9 @@ def make_site_map(df, variable):
     return m #return the map to be used in app.py
 
 ##current stats for display 
-def get_current_stats(df, variable): #define the function 
+@st.cache_data(ttl=900, show_spinner=False)
+def get_current_stats(variable): #define the function 
+    df = load_synoptic_data()
     sub = (
         df.filter(pl.col("variable") == variable) #control for variable will select was is displayed for current conditions
           .filter(pl.col("value").is_not_null()) #will break and will display error if null
