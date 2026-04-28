@@ -141,11 +141,11 @@ end_date = st.sidebar.date_input(
 
 ## MAIN WEBSITE CONTENT ##
 
-col1, col2 = st.columns([3, 1])  # wider left column for the map, narrower right column for stats
+col1, col2 = st.columns(2)  # equal-width columns for map and stats
 # add Folium map to col1
 with col1:
     site_map = make_site_map(df, variable)
-    st_folium(site_map, width=1100, height=600)  # expand map size and fill the column
+    st_folium(site_map, width=700, height=600)  # moderate width to fit half the row cleanly
 # add current conditions to col2
 with col2:
     stats_df = get_current_stats(df, variable) #pull from config.py
