@@ -1,0 +1,5 @@
+[client]
+mainModule = "Dashbord_repo/Dashboard-JS/app.py"
+
+[logger]
+level = "info"
