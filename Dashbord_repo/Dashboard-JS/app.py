@@ -26,10 +26,19 @@ st.markdown("""
     /* Main body text */
     .stApp,
     .stApp p,
-    .stApp label,
-    .stApp span {
+    .stApp label {
         font-family: 'Segoe UI', sans-serif;
         text-align: center;
+    }
+
+    /* Preserve material icon font rendering for Streamlit/UI icons */
+    .stApp .material-icons,
+    .stApp .material-icons-outlined,
+    .stApp .material-icons-round,
+    .stApp .material-icons-two-tone,
+    .stApp .material-icons-sharp {
+        font-family: 'Material Icons' !important;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
     }
 
     /* Wider main page content */
