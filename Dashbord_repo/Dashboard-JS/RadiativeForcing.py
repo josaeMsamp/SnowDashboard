@@ -90,8 +90,24 @@ def plot_albedo(df_wide):
         title="11am Snow Albedo"
     )
     fig.update_traces(marker=dict(size=5))
-    fig.update_xaxes(showgrid=False, title_text="Date and Time")
-    fig.update_yaxes(showgrid=False, title_text="Albedo (Unitless)")
+    fig.update_xaxes(
+        showgrid=False,
+        showline=True,
+        linecolor="lightgrey",
+        linewidth=1,
+        ticks="outside",
+        tickcolor="lightgrey",
+        title_text="Date and Time"
+    )
+    fig.update_yaxes(
+        showgrid=False,
+        showline=True,
+        linecolor="lightgrey",
+        linewidth=1,
+        ticks="outside",
+        tickcolor="lightgrey",
+        title_text="Albedo (Unitless)"
+    )
     return fig
 
 

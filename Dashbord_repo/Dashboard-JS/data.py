@@ -80,13 +80,25 @@ def plot_variable(df, variable, sites, start_date, end_date):
 
     fig.update_traces(marker=dict(size=3))
 
-    # Remove gridlines
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
-
-    # Set axis titles
-    fig.update_xaxes(title_text="Date and Time")
-    fig.update_yaxes(title_text=f"{VARIABLE_LABELS[variable]}")
+    # Remove gridlines and style axis lines
+    fig.update_xaxes(
+        showgrid=False,
+        showline=True,
+        linecolor="lightgrey",
+        linewidth=1,
+        ticks="outside",
+        tickcolor="lightgrey",
+        title_text="Date and Time"
+    )
+    fig.update_yaxes(
+        showgrid=False,
+        showline=True,
+        linecolor="lightgrey",
+        linewidth=1,
+        ticks="outside",
+        tickcolor="lightgrey",
+        title_text=f"{VARIABLE_LABELS[variable]}"
+    )
 
     return fig 
 
