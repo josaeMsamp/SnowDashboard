@@ -16,7 +16,7 @@ from config import SITE_COLORS, STATIONS, API_TOKEN
 os.environ.setdefault("SYNOPTIC_TOKEN", API_TOKEN) #very important for synoptic data pull
 
 #define function to download data
-@st.cache_data(ttl=10800, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_synoptic_data_wide():
     start = datetime(2025, 10, 1)
     end = datetime.utcnow()
@@ -32,6 +32,7 @@ def load_synoptic_data_wide():
     )
 
     df = ts.df().to_pandas()
+        
     df_wide = df.pivot_table(
     index=["stid", "date_time"],
     columns="variable",
@@ -65,7 +66,7 @@ def load_synoptic_data_wide():
 
     return df_wide
 
-@st.cache_data(ttl=10800, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_albedo_data():
     df_wide = load_synoptic_data_wide()
     df_wide = df_wide.copy()

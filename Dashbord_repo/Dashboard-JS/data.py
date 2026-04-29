@@ -15,7 +15,7 @@ from config import SITE_INFO
 
 ##MAIN DATA PLOT##
 
-@st.cache_data(ttl=10800, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def load_synoptic_data():
     start = datetime(2025, 10, 1) #aribtrary start date
     end = datetime.utcnow() #end current time
@@ -29,10 +29,9 @@ def load_synoptic_data():
         units="metric", #metric units
         verbose=False,
     )
-
     return ts.df() #return as data frame
 
-@st.cache_data(ttl=900, show_spinner=False)
+@st.cache_data(show_spinner=False)
 def plot_variable(variable, sites, start_date, end_date): 
     df = load_synoptic_data()
     df = df.filter(pl.col("variable") == variable) #filter by variable
